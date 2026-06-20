@@ -10,15 +10,7 @@ from help_show import imshow
 
 def mascara_roja(frame_bgr, cerrar=True):
     """
-    Segmenta el rojo del dado en HSV (U5) y lo limpia con morfología (U6).
-
-    El rojo "envuelve" el círculo de Hue, así que se usan dos rangos (cerca de
-    0 y cerca de 180). S y V mínimos evitan sombras y zonas pálidas.
-
-    `cerrar=True`  -> aplica cierre y deja el dado como un blob sólido (los pips
-                      quedan rellenos). Sirve para detectar/seguir los dados.
-    `cerrar=False` -> solo apertura: los pips quedan como huecos en el rojo, que
-                      es justo lo que necesitamos para contarlos.
+    Segmenta el rojo del dado en HSV (U5) y lo limpia con morfología.
     """
     hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
     rojo_bajo = cv2.inRange(hsv, (0, 80, 60), (10, 255, 255))
@@ -37,12 +29,6 @@ def segmentar_dados(frame_bgr, area_min=2000, area_max=15000):
     """
     Devuelve la máscara binaria con los dados de un frame y la lista de
     dados detectados (bbox, área, centroide).
-
-    Los dados son rojos sobre fondo verde/turquesa, así que el color es el
-    discriminador (U5). Se limpia con morfología (U6) y se separan los objetos
-    con componentes conexas, filtrando por área (U7) para quedarnos solo con
-    blobs del tamaño de un dado: descartamos la mano (área > area_max) y el
-    ruido (área < area_min).
     """
     mask_roja = mascara_roja(frame_bgr, cerrar=True)
 
@@ -74,8 +60,6 @@ def mascaras_por_frame(video_path):
     """
     Recorre el video en streaming y entrega, por cada frame, la máscara
     binaria de los 5 dados (yield). No acumula nada: memoria acotada.
-
-    Devuelve por iteración: (idx, frame_bgr, mask_dados)
     """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -103,8 +87,6 @@ def emparejar_dados(prev_dados, curr_dados, radio_max=40):
     """
     Empareja cada dado del frame actual con el más cercano del frame anterior,
     siempre que estén a menos de `radio_max` píxeles.
-
-    Devuelve lista de (dado_actual, distancia_movida | None si no tuvo par).
     """
     emparejados = []
     usados = set()
@@ -184,11 +166,6 @@ def contar_pips(frame_bgr, dados, pip_area_min=20):
     """
     Cuenta los puntos (pips) de la cara de cada dado y devuelve la lista de
     dados con el campo 'valor' agregado.
-
-    Idea: dentro del cuerpo rojo del dado los pips son huecos claros (no rojos).
-    Si relleno la cara del dado y le resto el rojo, me quedan justo los pips.
-    Cada pip es una componente conexa (U7); cuento las que superan `pip_area_min`
-    para descartar ruido. El número de componentes es el valor de la cara.
     """
     # Apertura SIN cierre: así los pips siguen siendo huecos en el rojo.
     rojo = mascara_roja(frame_bgr, cerrar=False)

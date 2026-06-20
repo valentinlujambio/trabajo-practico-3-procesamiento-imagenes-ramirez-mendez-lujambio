@@ -35,12 +35,6 @@ def propiedades_video(video_path):
 def buscar_dados_quietos(video_path, frames_estable=FRAMES_ESTABLE):
     """
     Recorre el video hasta que los 5 dados quedan quietos.
-
-    Devuelve (idx_quieto, frame_quieto, dados_valor):
-      - idx_quieto: índice del frame en que se los dio por quietos
-      - frame_quieto: ese frame (BGR), copiado
-      - dados_valor: lista de dados con bbox + 'valor' (pips contados)
-    Si nunca se estabilizan los 5, devuelve (None, None, None).
     """
     tracker = SeguimientoCentroides(umbral_px=8, radio_max=40)
     cap = cv2.VideoCapture(video_path)
@@ -88,13 +82,6 @@ def _dado_presente(dado_ref, dados_actuales, radio_max=40):
 def generar_video_salida(video_path, salida_path, dados_ref):
     """
     Reescribe el video rotulando cada dado mientras está en reposo.
-
-    En cada frame se vuelven a detectar los dados y, para cada dado de
-    referencia (con su id y valor fijos del frame quieto), se dibuja el
-    bounding box solo si sigue presente en su posición. Cuando la mano se
-    lleva un dado, deja de detectarse y su recuadro desaparece.
-
-    La etiqueta sigue el formato pedido: D<id>-<valor> (ej. D1-5).
     """
     props = propiedades_video(video_path)
     cap = cv2.VideoCapture(video_path)
