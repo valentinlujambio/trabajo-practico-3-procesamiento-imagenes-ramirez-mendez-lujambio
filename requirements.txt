@@ -1,4 +1,7 @@
-opencv-python
+# headless: el build de Railway no trae las libs de GUI (libxcb, libGL) que pide
+# `opencv-python`. Ni la API ni `dados.py`/`main.py` usan cv2.imshow (el paso a
+# paso se dibuja con matplotlib en backend Agg), asi que no se pierde nada.
+opencv-python-headless
 matplotlib
 
 # Capa HTTP (api/): expone la solucion como microservicio.
