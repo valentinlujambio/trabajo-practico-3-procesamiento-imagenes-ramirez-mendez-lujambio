@@ -1,2 +1,8 @@
 opencv-python
 matplotlib
+
+# Capa HTTP (api/): expone la solucion como microservicio.
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+python-dotenv>=1.0
